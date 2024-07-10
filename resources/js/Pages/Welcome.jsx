@@ -11,6 +11,11 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
     return (
         <>
+
+            <div className='w-10 h-10 bg-black'>
+
+            </div>
+
             <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100vh", width: "100%" }}>
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
