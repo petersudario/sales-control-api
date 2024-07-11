@@ -16,17 +16,20 @@ class VendasController extends Controller
         return Inertia::render('Vendas/Index', ['sales' => $vendas]);
     }
 
-    public function getAllDiretorias(){
+    public function getAllDiretorias()
+    {
         $diretorias = DB::table('diretoria')->get();
         return response()->json($diretorias, 200);
     }
 
-    public function filterUnidades($diretoria_id) {
+    public function filterUnidades($diretoria_id)
+    {
         $unidades = DB::table('unidade')->where('diretoria_id', $diretoria_id)->get();
         return response()->json($unidades);
     }
 
-    public function filterVendedores($unidade_id) {
+    public function filterVendedores($unidade_id)
+    {
         $vendedores = DB::table('users')->where('cargo', 'Vendedor')->where('unidade_id', $unidade_id)->get();
         return response()->json($vendedores);
     }
@@ -42,7 +45,7 @@ class VendasController extends Controller
         $unidades = Unidade::all();
 
         $closestUnidade = null;
-        $minDistance = INF; 
+        $minDistance = INF;
 
         foreach ($unidades as $unidade) {
             if ($unidade->id === $currentUnidade->id) {
@@ -84,7 +87,8 @@ class VendasController extends Controller
         return $angle * $earthRadius;
     }
 
-    public function getSalesFiltered($diretoria_id, $unidade_id, $vendedor_id){
+    public function getSalesFiltered($diretoria_id, $unidade_id, $vendedor_id, $date)
+    {
         $vendas = Venda::all();
 
         $response = [];
@@ -107,6 +111,12 @@ class VendasController extends Controller
         if ($vendedor_id != 0 && $vendedor_id != null) {
             $vendas = $vendas->filter(function ($venda) use ($vendedor_id) {
                 return $venda->vendedor_id == $vendedor_id;
+            });
+        }
+
+        if ($date != 0 && $date != null) {
+            $vendas = $vendas->filter(function ($venda) use ($date) {
+                return Carbon::parse($venda->created_at)->format('Y-m-d') == $date;
             });
         }
 

@@ -14,20 +14,22 @@ export default function Index({ auth }) {
     const [selectedDiretoria, setSelectedDiretoria] = useState('0');
     const [selectedUnidade, setSelectedUnidade] = useState('0');
     const [selectedVendedor, setSelectedVendedor] = useState('0');
+    const [selectedDate, setSelectedDate] = useState('0');
 
     const [diretorias, setDiretorias] = useState([]);
     const [unidades, setUnidades] = useState([]);
     const [vendedores, setVendedores] = useState([]);
 
+
     useEffect(() => {
-        axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/filter`).then(response => {
+        axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
             console.log(response.data);
             setSales(response.data);
         })
             .catch((error) => {
                 console.log(error);
             });
-    }, [selectedDiretoria, selectedUnidade, selectedVendedor]);
+    }, [selectedDiretoria, selectedUnidade, selectedVendedor, selectedDate]);
 
 
 
@@ -68,6 +70,7 @@ export default function Index({ auth }) {
     const handleDiretoriaChange = (e) => {
         setSelectedDiretoria(e.target.value);
         setSelectedUnidade('0');
+        setSelectedVendedor('0');
     }
 
     const handleUnidadeChange = (e) => {
@@ -79,10 +82,14 @@ export default function Index({ auth }) {
         setSelectedVendedor(e.target.value);
     }
 
+    const handleDateChange = (e) => {
+        setSelectedDate(e.target.value);
+    }
+
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Tabela de Vendas</h2>}
         >
             <Head title="Dashboard" />
 
@@ -161,7 +168,7 @@ export default function Index({ auth }) {
 
                                     <div>
                                         <p>Data</p>
-                                        <input type="date" class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
+                                        <input value={selectedDate} onChange={handleDateChange} type="date" class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
                                     </div>
                                 </div>
 
