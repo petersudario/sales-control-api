@@ -2,31 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Unidade;
-use App\Models\User;
 use App\Models\Venda;
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class VendasController extends Controller
 {
-    public function index() {
-
+    public function index()
+    {
         $vendas = $this->getSales();
-
         return Inertia::render('Vendas/Index', ['sales' => $vendas]);
     }
 
+    public function searchNearbyUnidades($currentUnidadeId)
+    {
+        $currentUnidade = Unidade::find($currentUnidadeId);
 
-    public function getSales(){
+        if (!$currentUnidade) {
+            return response()->json(['error' => 'Unidade not found'], 404);
+        }
+
+        $unidades = Unidade::all();
+
+        $closestUnidade = null;
+        $minDistance = INF; 
+
+        foreach ($unidades as $unidade) {
+            if ($unidade->id === $currentUnidade->id) {
+                continue;
+            }
+
+            $distance = $this->getDistanceBetweenPoints(
+                $currentUnidade->latitude,
+                $currentUnidade->longitude,
+                $unidade->latitude,
+                $unidade->longitude
+            );
+
+            if ($distance < $minDistance) {
+                $closestUnidade = $unidade;
+                $minDistance = $distance;
+            }
+        }
+
+        return $closestUnidade->unidade;
+    }
+
+
+    public function getDistanceBetweenPoints($latitude1, $longitude1, $latitude2, $longitude2)
+    {
+        $earthRadius = 6371;
+
+        $latFrom = deg2rad($latitude1);
+        $lonFrom = deg2rad($longitude1);
+        $latTo = deg2rad($latitude2);
+        $lonTo = deg2rad($longitude2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+
+        return $angle * $earthRadius;
+    }
+
+
+    public function getSales()
+    {
 
         $vendas = Venda::all();
 
@@ -34,29 +79,31 @@ class VendasController extends Controller
 
         foreach ($vendas as $venda) {
             $saleInfo = DB::table('users')
-            ->join('diretoria', 'users.diretoria_id', '=', 'diretoria.id')
-            ->join('unidade', 'users.unidade_id', '=', 'unidade.id')
-            ->where('users.id', $venda->vendedor_id)
-            ->select(
-                DB::raw('users.id as user_id'),
-                DB::raw('users.diretoria_id as diretoria_id'),
-                DB::raw('users.gerente_id as gerente_id'),
-                DB::raw('users.name as username'),
-                DB::raw('diretoria.diretoria as diretoria'),
-                DB::raw('unidade.unidade as unidade'),
-                DB::raw('unidade.latitude as latitude'),
-                DB::raw('unidade.longitude as longitude')
-            )
-            ->get();
+                ->join('diretoria', 'users.diretoria_id', '=', 'diretoria.id')
+                ->join('unidade', 'users.unidade_id', '=', 'unidade.id')
+                ->where('users.id', $venda->vendedor_id)
+                ->select(
+                    DB::raw('users.id as user_id'),
+                    DB::raw('users.unidade_id as unidade_id'),
+                    DB::raw('users.diretoria_id as diretoria_id'),
+                    DB::raw('users.gerente_id as gerente_id'),
+                    DB::raw('users.name as username'),
+                    DB::raw('diretoria.diretoria as diretoria'),
+                    DB::raw('unidade.unidade as unidade'),
+                    DB::raw('unidade.latitude as latitude'),
+                    DB::raw('unidade.longitude as longitude')
+                )
+                ->get();
 
             $saleInfo = $saleInfo[0];
 
             $saleInfo->valor = $venda->valor;
             $saleInfo->is_roaming = $venda->is_roaming;
+            $saleInfo->closest_unidade = $this->searchNearbyUnidades($saleInfo->unidade_id);
             $saleInfo->created_at = Carbon::parse($venda->created_at)->format('d/m/Y H:i:s');
 
             $response[] = $saleInfo;
-        
+
         }
 
         return response()->json($response);
