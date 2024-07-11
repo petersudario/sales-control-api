@@ -1,7 +1,7 @@
 import { Link, Head } from '@inertiajs/react';
 import { MapContainer, TileLayer, Circle } from 'react-leaflet';
 
-export default function Welcome({ auth, laravelVersion, phpVersion }) {
+export default function Home({ auth, laravelVersion, phpVersion }) {
     const handleImageError = () => {
         document.getElementById('screenshot-container')?.classList.add('!hidden');
         document.getElementById('docs-card')?.classList.add('!row-span-1');
