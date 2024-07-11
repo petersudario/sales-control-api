@@ -84,6 +84,64 @@ class VendasController extends Controller
         return $angle * $earthRadius;
     }
 
+    public function getSalesFiltered($diretoria_id, $unidade_id, $vendedor_id){
+        $vendas = Venda::all();
+
+        $response = [];
+
+        if ($diretoria_id != 0 && $diretoria_id != null) {
+            $vendas = $vendas->filter(function ($venda) use ($diretoria_id) {
+                $vendedor = DB::table('users')->where('id', $venda->vendedor_id)->first();
+                $unidade = DB::table('unidade')->where('id', $vendedor->unidade_id)->first();
+                return $unidade->diretoria_id == $diretoria_id;
+            });
+        }
+
+        if ($unidade_id != 0 && $unidade_id != null) {
+            $vendas = $vendas->filter(function ($venda) use ($unidade_id) {
+                $vendedor = DB::table('users')->where('id', $venda->vendedor_id)->first();
+                return $vendedor->unidade_id == $unidade_id;
+            });
+        }
+
+        if ($vendedor_id != 0 && $vendedor_id != null) {
+            $vendas = $vendas->filter(function ($venda) use ($vendedor_id) {
+                return $venda->vendedor_id == $vendedor_id;
+            });
+        }
+
+        foreach ($vendas as $venda) {
+            $saleInfo = DB::table('users')
+                ->join('diretoria', 'users.diretoria_id', '=', 'diretoria.id')
+                ->join('unidade', 'users.unidade_id', '=', 'unidade.id')
+                ->where('users.id', $venda->vendedor_id)
+                ->select(
+                    DB::raw('users.id as user_id'),
+                    DB::raw('users.unidade_id as unidade_id'),
+                    DB::raw('users.diretoria_id as diretoria_id'),
+                    DB::raw('users.gerente_id as gerente_id'),
+                    DB::raw('users.name as username'),
+                    DB::raw('diretoria.diretoria as diretoria'),
+                    DB::raw('unidade.unidade as unidade'),
+                    DB::raw('unidade.latitude as latitude'),
+                    DB::raw('unidade.longitude as longitude')
+                )
+                ->get();
+
+            $saleInfo = $saleInfo[0];
+
+            $saleInfo->valor = $venda->valor;
+            $saleInfo->is_roaming = $venda->is_roaming;
+            $saleInfo->closest_unidade = $this->searchNearbyUnidades($saleInfo->unidade_id);
+            $saleInfo->created_at = Carbon::parse($venda->created_at)->format('d/m/Y H:i:s');
+
+            $response[] = $saleInfo;
+
+        }
+
+        return response()->json($response);
+    }
+
 
     public function getSales()
     {

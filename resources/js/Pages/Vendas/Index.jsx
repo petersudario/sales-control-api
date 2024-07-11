@@ -7,18 +7,29 @@ import { useEffect, useState } from 'react';
 
 export default function Index({ auth }) {
 
-    const { sales } = usePage().props;
-
+    const [sales, setSales] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState({});
 
-    const [selectedDiretoria, setSelectedDiretoria] = useState('');
-    const [selectedUnidade, setSelectedUnidade] = useState('');
-    const [selectedVendedor, setSelectedVendedor] = useState('');
+    const [selectedDiretoria, setSelectedDiretoria] = useState('0');
+    const [selectedUnidade, setSelectedUnidade] = useState('0');
+    const [selectedVendedor, setSelectedVendedor] = useState('0');
 
     const [diretorias, setDiretorias] = useState([]);
     const [unidades, setUnidades] = useState([]);
     const [vendedores, setVendedores] = useState([]);
+
+    useEffect(() => {
+        axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/filter`).then(response => {
+            console.log(response.data);
+            setSales(response.data);
+        })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [selectedDiretoria, selectedUnidade, selectedVendedor]);
+
+
 
     useEffect(() => {
         axios.get('/api/diretorias').then(response => {
@@ -56,12 +67,12 @@ export default function Index({ auth }) {
 
     const handleDiretoriaChange = (e) => {
         setSelectedDiretoria(e.target.value);
-        setSelectedUnidade('');
+        setSelectedUnidade('0');
     }
 
     const handleUnidadeChange = (e) => {
         setSelectedUnidade(e.target.value);
-        setSelectedVendedor('');
+        setSelectedVendedor('0');
     }
 
     const handleVendedorChange = (e) => {
@@ -108,8 +119,6 @@ export default function Index({ auth }) {
                 </div>
             </Modal>
 
-
-
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="overflow-hidden shadow-sm sm:rounded-lg">
@@ -119,7 +128,7 @@ export default function Index({ auth }) {
                                     <div>
                                         <p>Diretoria</p>
                                         <select value={selectedDiretoria} onChange={handleDiretoriaChange} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
-                                            <option value="">Todas</option>
+                                            <option value="0">Todas</option>
                                             {diretorias.map((diretoria, key) => (
                                                 <option key={key} value={diretoria.id}>{diretoria.diretoria}</option>
                                             ))}
@@ -130,7 +139,7 @@ export default function Index({ auth }) {
                                     <div>
                                         <p>Unidade</p>
                                         <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={!selectedDiretoria} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
-                                            <option value="">Todas</option>
+                                            <option value="0">Todas</option>
                                             {unidades.map((unidade, key) => (
                                                 <option key={key} value={unidade.id}>{unidade.unidade}</option>
                                             ))}
@@ -141,7 +150,7 @@ export default function Index({ auth }) {
                                     <div>
                                         <p>Vendedor</p>
                                         <select value={selectedVendedor} onChange={handleVendedorChange} disabled={!selectedUnidade} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
-                                            <option value="">Todos</option>
+                                            <option value="0">Todos</option>
 
                                             {vendedores.map((vendedor, key) => (
                                                 <option key={key} value={vendedor.id}>{vendedor.name}</option>
@@ -154,11 +163,6 @@ export default function Index({ auth }) {
                                         <p>Data</p>
                                         <input type="date" class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
                                     </div>
-                                </div>
-
-
-                                <div>
-                                    <button type='submit' class="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded">Filtrar</button>
                                 </div>
 
                             </form>
@@ -185,12 +189,13 @@ export default function Index({ auth }) {
                                         </th>
                                     </tr>
                                 </thead>
+                                
                                 <tbody>
-                                    {sales.original.length === 0 ? (
-                                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                                    {sales.length === 0 ? (
+                                        <div className="w-full overflow-hidden shadow-sm sm:rounded-lg">
                                             <div className="p-6 text-gray-900">Nenhuma venda cadastrada</div>
                                         </div>
-                                    ) : (sales.original.map((sale, key) => (
+                                    ) : (sales.map((sale, key) => (
                                         <>
                                             <tr class="bg-white border-b ">
                                                 <th scope="row" class="px-6 py-4 font-medium">
