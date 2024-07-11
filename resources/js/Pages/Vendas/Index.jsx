@@ -126,11 +126,17 @@ export default function Index({ auth }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="relative overflow-x-auto">
-                            <form className='flex py-4 items-center justify-between'>
+                            <div class="py-2">
+                                <div class="flex justify-between">
+                                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Filtros</h2>
+                                </div>
+                            </div>
+                            <form className='flex pb-[40px] items-center justify-between'>
+                                
                                 <div className='flex gap-6'>
                                     <div>
                                         <p>Diretoria</p>
-                                        <select value={selectedDiretoria} onChange={handleDiretoriaChange} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
+                                        <select value={selectedDiretoria} onChange={handleDiretoriaChange} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
                                             <option value="0">Todas</option>
                                             {diretorias.map((diretoria, key) => (
                                                 <option key={key} value={diretoria.id}>{diretoria.diretoria}</option>
@@ -141,7 +147,7 @@ export default function Index({ auth }) {
 
                                     <div>
                                         <p>Unidade</p>
-                                        <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={!selectedDiretoria} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
+                                        <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={!selectedDiretoria} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
                                             <option value="0">Todas</option>
                                             {unidades.map((unidade, key) => (
                                                 <option key={key} value={unidade.id}>{unidade.unidade}</option>
@@ -152,7 +158,7 @@ export default function Index({ auth }) {
 
                                     <div>
                                         <p>Vendedor</p>
-                                        <select value={selectedVendedor} onChange={handleVendedorChange} disabled={!selectedUnidade} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
+                                        <select value={selectedVendedor} onChange={handleVendedorChange} disabled={!selectedUnidade} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
                                             <option value="0">Todos</option>
 
                                             {vendedores.map((vendedor, key) => (
