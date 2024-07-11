@@ -23,7 +23,6 @@ export default function Index({ auth }) {
 
     useEffect(() => {
         axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
-            console.log(response.data);
             setSales(response.data);
         })
             .catch((error) => {
@@ -35,7 +34,6 @@ export default function Index({ auth }) {
 
     useEffect(() => {
         axios.get('/api/diretorias').then(response => {
-            console.log(response.data);
             setDiretorias(response.data);
         })
             .catch((error) => {
@@ -46,7 +44,6 @@ export default function Index({ auth }) {
     useEffect(() => {
         if (selectedDiretoria) {
             axios.get(`/api/unidades/${selectedDiretoria}/filter`).then(response => {
-                console.log(response.data);
                 setUnidades(response.data);
             })
                 .catch((error) => {
@@ -58,7 +55,6 @@ export default function Index({ auth }) {
     useEffect(() => {
         if (selectedUnidade) {
             axios.get(`/api/vendedores/${selectedUnidade}/filter`).then(response => {
-                console.log(response.data);
                 setVendedores(response.data);
             })
                 .catch((error) => {
