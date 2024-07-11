@@ -16,6 +16,21 @@ class VendasController extends Controller
         return Inertia::render('Vendas/Index', ['sales' => $vendas]);
     }
 
+    public function getAllDiretorias(){
+        $diretorias = DB::table('diretoria')->get();
+        return response()->json($diretorias, 200);
+    }
+
+    public function filterUnidades($diretoria_id) {
+        $unidades = DB::table('unidade')->where('diretoria_id', $diretoria_id)->get();
+        return response()->json($unidades);
+    }
+
+    public function filterVendedores($unidade_id) {
+        $vendedores = DB::table('users')->where('cargo', 'Vendedor')->where('unidade_id', $unidade_id)->get();
+        return response()->json($vendedores);
+    }
+
     public function searchNearbyUnidades($currentUnidadeId)
     {
         $currentUnidade = Unidade::find($currentUnidadeId);

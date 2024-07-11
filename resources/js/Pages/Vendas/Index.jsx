@@ -2,13 +2,71 @@ import Modal from '@/Components/Modal';
 import SaleMap from '@/Components/SaleMap';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 export default function Index({ auth }) {
 
     const { sales } = usePage().props;
+
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState({});
+
+    const [selectedDiretoria, setSelectedDiretoria] = useState('');
+    const [selectedUnidade, setSelectedUnidade] = useState('');
+    const [selectedVendedor, setSelectedVendedor] = useState('');
+
+    const [diretorias, setDiretorias] = useState([]);
+    const [unidades, setUnidades] = useState([]);
+    const [vendedores, setVendedores] = useState([]);
+
+    useEffect(() => {
+        axios.get('/api/diretorias').then(response => {
+            console.log(response.data);
+            setDiretorias(response.data);
+        })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
+
+    useEffect(() => {
+        if (selectedDiretoria) {
+            axios.get(`/api/unidades/${selectedDiretoria}/filter`).then(response => {
+                console.log(response.data);
+                setUnidades(response.data);
+            })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    }, [selectedDiretoria]);
+
+    useEffect(() => {
+        if (selectedUnidade) {
+            axios.get(`/api/vendedores/${selectedUnidade}/filter`).then(response => {
+                console.log(response.data);
+                setVendedores(response.data);
+            })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    }, [selectedUnidade]);
+
+    const handleDiretoriaChange = (e) => {
+        setSelectedDiretoria(e.target.value);
+        setSelectedUnidade('');
+    }
+
+    const handleUnidadeChange = (e) => {
+        setSelectedUnidade(e.target.value);
+        setSelectedVendedor('');
+    }
+
+    const handleVendedorChange = (e) => {
+        setSelectedVendedor(e.target.value);
+    }
 
     return (
         <AuthenticatedLayout
@@ -50,10 +108,61 @@ export default function Index({ auth }) {
                 </div>
             </Modal>
 
+
+
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="relative overflow-x-auto">
+                            <form className='flex py-4 items-center justify-between'>
+                                <div className='flex gap-6'>
+                                    <div>
+                                        <p>Diretoria</p>
+                                        <select value={selectedDiretoria} onChange={handleDiretoriaChange} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
+                                            <option value="">Todas</option>
+                                            {diretorias.map((diretoria, key) => (
+                                                <option key={key} value={diretoria.id}>{diretoria.diretoria}</option>
+                                            ))}
+
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <p>Unidade</p>
+                                        <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={!selectedDiretoria} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
+                                            <option value="">Todas</option>
+                                            {unidades.map((unidade, key) => (
+                                                <option key={key} value={unidade.id}>{unidade.unidade}</option>
+                                            ))}
+
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <p>Vendedor</p>
+                                        <select value={selectedVendedor} onChange={handleVendedorChange} disabled={!selectedUnidade} class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
+                                            <option value="">Todos</option>
+
+                                            {vendedores.map((vendedor, key) => (
+                                                <option key={key} value={vendedor.id}>{vendedor.name}</option>
+                                            ))}
+
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <p>Data</p>
+                                        <input type="date" class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
+                                    </div>
+                                </div>
+
+
+                                <div>
+                                    <button type='submit' class="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded">Filtrar</button>
+                                </div>
+
+                            </form>
+
                             <table class="w-full text-sm text-left rtl:text-right">
                                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
                                     <tr>
@@ -114,8 +223,6 @@ export default function Index({ auth }) {
                     </div>
                 </div>
             </div>
-
-
         </AuthenticatedLayout>
     );
 }
