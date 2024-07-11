@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 export default function SaleMap({ sale }) {
+
     useEffect(() => {
         if (!sale || !sale.latitude || !sale.longitude) {
             return;
@@ -32,7 +33,7 @@ export default function SaleMap({ sale }) {
         L.marker([sale.latitude, sale.longitude]).addTo(map);
 
         return () => {
-            map.remove(); 
+            map.remove();
         };
     }, [sale]);
 
@@ -40,4 +41,3 @@ export default function SaleMap({ sale }) {
         <div id="map" style={{ height: '200px', width: '200px' }}></div>
     );
 };
-
