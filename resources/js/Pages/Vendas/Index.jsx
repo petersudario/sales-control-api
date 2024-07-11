@@ -22,6 +22,10 @@ export default function Index({ auth }) {
 
 
     useEffect(() => {
+        if (selectedDate === "") {
+            setSelectedDate('0');
+        }
+        
         axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
             setSales(response.data);
         })
