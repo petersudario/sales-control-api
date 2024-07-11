@@ -7,6 +7,7 @@ use App\Models\Venda;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Mockery\Undefined;
 
 class VendasController extends Controller
 {
@@ -114,7 +115,7 @@ class VendasController extends Controller
             });
         }
 
-        if ($date != 0 && $date != null) {
+        if ($date != 0 && $date != null && $date != "") {
             $vendas = $vendas->filter(function ($venda) use ($date) {
                 return Carbon::parse($venda->created_at)->format('Y-m-d') == $date;
             });
