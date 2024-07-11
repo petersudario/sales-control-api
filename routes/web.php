@@ -9,10 +9,8 @@ use App\Http\Controllers\MapController;
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/', [MapController::class, 'index']);
+    Route::get('/profile', [MapController::class, 'index'])->name('profile.edit');
+    Route::get('/', [MapController::class, 'index'])->name('home');
 
     Route::get('/unidades/total-sales', [MapController::class, 'getTotalSales']);
 
