@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\BrazilMapController;
-use App\Http\Controllers\MapController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\VendasController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\MapController;
+
 
 
 
@@ -18,4 +17,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/', [MapController::class, 'index']);
 
 Route::get('/unidades/total-sales', [MapController::class, 'getTotalSales']);
+
+Route::get('/vendas', [VendasController::class, 'index']);
+
 require __DIR__.'/auth.php';
