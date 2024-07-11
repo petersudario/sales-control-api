@@ -18,7 +18,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/vendas', [VendasController::class, 'index'])->name('vendas.index');
 
+
     Route::get('/unidades/{currentUnidadeId}/nearby', [VendasController::class, 'searchNearbyUnidades']);
+    
 });
 
 
