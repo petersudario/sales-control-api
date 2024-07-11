@@ -20,4 +20,7 @@ Route::get('/unidades/total-sales', [MapController::class, 'getTotalSales']);
 
 Route::get('/vendas', [VendasController::class, 'index']);
 
+Route::get('/unidades/{currentUnidadeId}/nearby', [VendasController::class, 'searchNearbyUnidades']);
+
+
 require __DIR__.'/auth.php';
