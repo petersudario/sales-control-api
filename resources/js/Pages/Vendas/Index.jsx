@@ -22,37 +22,57 @@ export default function Index({ auth }) {
 
 
     useEffect(() => {
+
         if (selectedDate === "") {
             setSelectedDate('0');
         }
-        
-        axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
-            setSales(response.data);
-        })
-            .catch((error) => {
+
+        if (auth.user.cargo === 'Diretor Geral') {
+            axios.get(`/api/vendas/${selectedDiretoria}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
+                setSales(response.data);
+            }).catch((error) => {
                 console.log(error);
             });
+        } else if (auth.user.cargo === 'Diretor') {
+            axios.get(`/api/vendas/${auth.user.diretoria_id}/${selectedUnidade}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
+                setSelectedDiretoria(auth.user.diretoria_id);
+                setSales(response.data);
+            }).catch((error) => {
+                console.log(error);
+            });
+        } else if (auth.user.cargo === 'Gerente') {
+            axios.get(`/api/vendas/${auth.user.diretoria_id}/${auth.user.unidade_id}/${selectedVendedor}/${selectedDate}/filter`).then(response => {
+                setSelectedDiretoria(auth.user.diretoria_id);
+                setSelectedUnidade(auth.user.unidade_id);
+                setSales(response.data);
+            }).catch((error) => {
+                console.log(error);
+            });
+        } else if (auth.user.cargo === 'Vendedor') {
+            axios.get(`/api/vendas/${auth.user.diretoria_id}/${auth.user.unidade_id}/${auth.user.id}/${selectedDate}/filter`).then(response => {
+                setSales(response.data);
+            }).catch((error) => {
+                console.log(error);
+            });
+        }
+
     }, [selectedDiretoria, selectedUnidade, selectedVendedor, selectedDate]);
-
-
 
     useEffect(() => {
         axios.get('/api/diretorias').then(response => {
             setDiretorias(response.data);
-        })
-            .catch((error) => {
-                console.log(error);
-            });
+        }).catch((error) => {
+            console.log(error);
+        });
     }, []);
 
     useEffect(() => {
         if (selectedDiretoria) {
             axios.get(`/api/unidades/${selectedDiretoria}/filter`).then(response => {
                 setUnidades(response.data);
-            })
-                .catch((error) => {
-                    console.log(error);
-                });
+            }).catch((error) => {
+                console.log(error);
+            });
         }
     }, [selectedDiretoria]);
 
@@ -60,10 +80,9 @@ export default function Index({ auth }) {
         if (selectedUnidade) {
             axios.get(`/api/vendedores/${selectedUnidade}/filter`).then(response => {
                 setVendedores(response.data);
-            })
-                .catch((error) => {
-                    console.log(error);
-                });
+            }).catch((error) => {
+                console.log(error);
+            });
         }
     }, [selectedUnidade]);
 
@@ -95,12 +114,9 @@ export default function Index({ auth }) {
 
             <Modal show={showModal}>
                 <div className="absolute top-0 right-0 p-4">
-                    <button onClick={() => setShowModal(false)} class="text-gray-
-                                                        500 hover:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
+                    <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
@@ -129,111 +145,106 @@ export default function Index({ auth }) {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="relative overflow-x-auto">
-                            <div class="py-2">
-                                <div class="flex justify-between">
-                                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Filtros</h2>
-                                </div>
-                            </div>
-                            <form className='flex pb-[40px] items-center justify-between'>
-                                
-                                <div className='flex gap-6'>
-                                    <div>
-                                        <p>Diretoria</p>
-                                        <select value={selectedDiretoria} onChange={handleDiretoriaChange} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
-                                            <option value="0">Todas</option>
-                                            {diretorias.map((diretoria, key) => (
-                                                <option key={key} value={diretoria.id}>{diretoria.diretoria}</option>
-                                            ))}
-
-                                        </select>
+                        <div className="relative overflow-x-auto">
+                            {auth.user.cargo != 'Vendedor' && (
+                                <>
+                                    <div className="py-2">
+                                        <div className="flex justify-between">
+                                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">Filtros</h2>
+                                        </div>
                                     </div>
+                                    <form className='flex pb-[40px] items-center justify-between'>
+                                        <div className='flex gap-6'>
+                                            <div>
+                                                <p>Diretoria</p>
+                                                <select disabled={auth.user.cargo !== 'Diretor Geral'} value={selectedDiretoria} onChange={handleDiretoriaChange} className="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
+                                                    <option value="0">Todas</option>
+                                                    {diretorias.map((diretoria, key) => (
+                                                        <option key={key} value={diretoria.id}>{diretoria.diretoria}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                    <div>
-                                        <p>Unidade</p>
-                                        <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={!selectedDiretoria} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
-                                            <option value="0">Todas</option>
-                                            {unidades.map((unidade, key) => (
-                                                <option key={key} value={unidade.id}>{unidade.unidade}</option>
-                                            ))}
+                                            <div>
+                                                <p>Unidade</p>
+                                                <select value={selectedUnidade} onChange={handleUnidadeChange} disabled={auth.user.cargo !== 'Diretor Geral' && auth.user.cargo !== 'Diretor' || !selectedDiretoria || selectedDiretoria === '0'} className="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="unidade-filter" id="unidade-filter">
+                                                    <option value="0">Todas</option>
+                                                    {unidades.map((unidade, key) => (
+                                                        <option key={key} value={unidade.id}>{unidade.unidade}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                        </select>
-                                    </div>
+                                            <div>
+                                                <p>Vendedor</p>
+                                                <select value={selectedVendedor} onChange={handleVendedorChange} disabled={auth.user.cargo === 'Vendedor' || !selectedUnidade || selectedUnidade === '0'} className="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
+                                                    <option value="0">Todos</option>
+                                                    {vendedores.map((vendedor, key) => (
+                                                        <option key={key} value={vendedor.id}>{vendedor.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                    <div>
-                                        <p>Vendedor</p>
-                                        <select value={selectedVendedor} onChange={handleVendedorChange} disabled={!selectedUnidade} class="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="vendedor-filter" id="vendedor-filter">
-                                            <option value="0">Todos</option>
-
-                                            {vendedores.map((vendedor, key) => (
-                                                <option key={key} value={vendedor.id}>{vendedor.name}</option>
-                                            ))}
-
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <p>Data</p>
-                                        <input value={selectedDate} onChange={handleDateChange} type="date" class="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
-                                    </div>
-                                </div>
-
-                            </form>
-
-                            <table class="w-full text-sm text-left rtl:text-right">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+                                            <div>
+                                                <p>Data</p>
+                                                <input value={selectedDate} onChange={handleDateChange} type="date" className="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
+                                            </div>
+                                        </div>
+                                    </form>
+                                </>
+                            )}
+                            <table className="w-full text-sm text-left rtl:text-right">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                             Data da venda
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                             valor da Venda
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                             Vendedor
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                             Unidade
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                             Diretoria
                                         </th>
-                                        <th scope="col" class="px-6 py-3">
+                                        <th scope="col" className="px-6 py-3">
                                         </th>
                                     </tr>
                                 </thead>
-                                
+
                                 <tbody>
                                     {sales.length === 0 ? (
                                         <div className="w-full overflow-hidden shadow-sm sm:rounded-lg">
                                             <div className="p-6 text-gray-900">Nenhuma venda cadastrada</div>
                                         </div>
                                     ) : (sales.map((sale, key) => (
-                                        <>
-                                            <tr class="bg-white border-b ">
-                                                <th scope="row" class="px-6 py-4 font-medium">
-                                                    {sale.created_at}
-                                                </th>
-                                                <td class="px-6 py-4">
-                                                    R${sale.valor}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {sale.username}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {sale.unidade}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {sale.diretoria}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <button onClick={() => {
-                                                        setModalData(sale);
-                                                        setShowModal(true);
-                                                    }} class="text-blue-500 hover:text-blue-700">Ver mais detalhes</button>
-                                                </td>
-                                            </tr>
-                                        </>
+                                        <tr key={key} className="bg-white border-b">
+                                            <th scope="row" className="px-6 py-4 font-medium">
+                                                {sale.created_at}
+                                            </th>
+                                            <td className="px-6 py-4">
+                                                R${sale.valor}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {sale.username}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {sale.unidade}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {sale.diretoria}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <button onClick={() => {
+                                                    setModalData(sale);
+                                                    setShowModal(true);
+                                                }} className="text-blue-500 hover:text-blue-700">Ver mais detalhes</button>
+                                            </td>
+                                        </tr>
                                     )))}
                                 </tbody>
                             </table>
@@ -244,7 +255,3 @@ export default function Index({ auth }) {
         </AuthenticatedLayout>
     );
 }
-
-
-
-
