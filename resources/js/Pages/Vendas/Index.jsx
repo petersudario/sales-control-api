@@ -20,7 +20,6 @@ export default function Index({ auth }) {
     const [unidades, setUnidades] = useState([]);
     const [vendedores, setVendedores] = useState([]);
 
-
     useEffect(() => {
 
         if (selectedDate === "") {
@@ -192,6 +191,15 @@ export default function Index({ auth }) {
                                         </div>
                                     </form>
                                 </>
+                            )}
+
+                            {auth.user.cargo === 'Vendedor' && (
+                                <div className="py-6">
+                                    <div className="flex justify-between">
+                                        <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={route('vendas.create')}>Realizar venda</a>
+
+                                    </div>
+                                </div>
                             )}
                             <table className="w-full text-sm text-left rtl:text-right">
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">

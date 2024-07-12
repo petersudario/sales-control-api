@@ -16,5 +16,7 @@ class Venda extends Authenticatable
         'vendedor_id',
         'is_roaming',
         'valor',
+        'latitude',
+        'longitude',
     ];
 }

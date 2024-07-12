@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Unidade;
 use App\Models\Venda;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Mockery\Undefined;
 
 class VendasController extends Controller
 {
@@ -15,6 +15,29 @@ class VendasController extends Controller
     {
         $vendas = $this->getSales();
         return Inertia::render('Vendas/Index', ['sales' => $vendas]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Vendas/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'valor' => 'required|min:1',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+        
+        Venda::create([
+            'vendedor_id' => $request->vendedor_id,
+            'valor' => $request->valor,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return redirect()->route('vendas.index');
     }
 
     public function getAllDiretorias()

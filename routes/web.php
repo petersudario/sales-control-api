@@ -12,8 +12,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [MapController::class, 'index'])->name('home');
     Route::get('/unidades/total-sales', [MapController::class, 'getTotalSales']);
     Route::get('/vendas', [VendasController::class, 'index'])->name('vendas.index');
+    Route::get('/vendas/create', [VendasController::class, 'create'])->name('vendas.create');
+    Route::post('/vendas', [VendasController::class, 'store'])->name('vendas.store');
     Route::get('/unidades/{currentUnidadeId}/nearby', [VendasController::class, 'searchNearbyUnidades']);
-    
 });
 
 
