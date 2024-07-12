@@ -4,6 +4,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { FaExclamation } from "react-icons/fa";
 
 export default function Index({ auth }) {
 
@@ -19,7 +20,6 @@ export default function Index({ auth }) {
     const [diretorias, setDiretorias] = useState([]);
     const [unidades, setUnidades] = useState([]);
     const [vendedores, setVendedores] = useState([]);
-
 
     useEffect(() => {
 
@@ -134,8 +134,21 @@ export default function Index({ auth }) {
                             <p>Diretoria: {modalData.diretoria}</p>
                         </div>
                         <div>
-                            <p>{modalData.is_roaming == 0 ? "Venda não está em roaming" : "Em Roaming"}</p>
-                            <p>Unidade próxima: {modalData.closest_unidade}</p>
+                            {modalData.is_roaming == 1 ? (
+                                <div className='flex items-center gap-2 bg-red-100 text-red-500 p-2 rounded-lg'>
+                                    <FaExclamation />
+                                    <p>Venda em Roaming</p>
+                                </div>
+                            ) : (
+                                <div className='flex items-center gap-2 bg-green-100 text-green-500 p-2 rounded-lg'>
+                                    <p>Venda Local</p>
+                                </div>
+                            )
+                            }
+                            <p className='py-2'>Unidade próxima: {modalData.closest_unidade}</p>
+                            <p>Localização da venda</p>
+                            <p className='text-sm px-2'>Latitude: {modalData.latitude}</p>
+                            <p className='text-sm px-2'>Longitude: {modalData.longitude}</p>
                             <SaleMap sale={modalData} />
                         </div>
                     </div>
@@ -192,6 +205,15 @@ export default function Index({ auth }) {
                                         </div>
                                     </form>
                                 </>
+                            )}
+
+                            {auth.user.cargo === 'Vendedor' && (
+                                <div className="py-6">
+                                    <div className="flex justify-between">
+                                        <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" href={route('vendas.create')}>Realizar venda</a>
+
+                                    </div>
+                                </div>
                             )}
                             <table className="w-full text-sm text-left rtl:text-right">
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
