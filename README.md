@@ -48,4 +48,9 @@ Este projeto foi criado com os frameworks Laravel 11, Leaflet e ReactJS
 > ## Step 7
 > Execute o comando "npm run dev" no segundo terminal para iniciar o vite.js
 
-> ## Aplicação pronta para ser usada no DEV environment. Abra o localhost:8000 no Browser.
+> ## Step 8
+> Execute o comando "php artisan db:seed --class=DatabaseSeeder" para popular a database com os dados necessários dos usuários
+
+
+
+> ## Aplicação pronta para ser usada no DEV environment. Abra o localhost:8000 no Browser e realize o login.
