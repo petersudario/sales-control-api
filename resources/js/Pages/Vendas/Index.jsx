@@ -159,15 +159,16 @@ export default function Index({ auth }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="relative overflow-x-auto">
-                            {auth.user.cargo != 'Vendedor' && (
-                                <>
-                                    <div className="py-2">
-                                        <div className="flex justify-between">
-                                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">Filtros</h2>
-                                        </div>
-                                    </div>
-                                    <form className='flex pb-[40px] items-center justify-between'>
-                                        <div className='flex gap-6'>
+
+                            <div className="py-2">
+                                <div className="flex justify-between">
+                                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">Filtros</h2>
+                                </div>
+                            </div>
+                            <form className='flex pb-[40px] items-center justify-between'>
+                                <div className='flex gap-6'>
+                                    {auth.user.cargo != 'Vendedor' && (
+                                        <>
                                             <div>
                                                 <p>Diretoria</p>
                                                 <select disabled={auth.user.cargo !== 'Diretor Geral'} value={selectedDiretoria} onChange={handleDiretoriaChange} className="top-0 w-[150px] right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="diretoria-filter" id="diretoria-filter">
@@ -197,15 +198,15 @@ export default function Index({ auth }) {
                                                     ))}
                                                 </select>
                                             </div>
+                                        </>
+                                    )}
 
-                                            <div>
-                                                <p>Data</p>
-                                                <input value={selectedDate} onChange={handleDateChange} type="date" className="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
-                                            </div>
-                                        </div>
-                                    </form>
-                                </>
-                            )}
+                                    <div>
+                                        <p>Data</p>
+                                        <input value={selectedDate} onChange={handleDateChange} type="date" className="top-0 right-0 p-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none" name="date-filter" id="date-filter" />
+                                    </div>
+                                </div>
+                            </form>
 
                             {auth.user.cargo === 'Vendedor' && (
                                 <div className="py-6">
