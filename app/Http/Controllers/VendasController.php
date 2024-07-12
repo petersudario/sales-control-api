@@ -29,7 +29,7 @@ class VendasController extends Controller
             'latitude' => 'required',
             'longitude' => 'required',
         ]);
-        
+
         Venda::create([
             'vendedor_id' => $request->vendedor_id,
             'valor' => $request->valor,
@@ -58,27 +58,21 @@ class VendasController extends Controller
         return response()->json($vendedores);
     }
 
-    public function searchNearbyUnidades($currentUnidadeId)
+    public function searchNearbyUnidades($latitude, $longitude, $unidade_id)
     {
-        $currentUnidade = Unidade::find($currentUnidadeId);
-
-        if (!$currentUnidade) {
-            return response()->json(['error' => 'Unidade not found'], 404);
-        }
-
         $unidades = Unidade::all();
 
         $closestUnidade = null;
         $minDistance = INF;
 
         foreach ($unidades as $unidade) {
-            if ($unidade->id === $currentUnidade->id) {
+            if ($unidade->id === $unidade_id) {
                 continue;
             }
 
             $distance = $this->getDistanceBetweenPoints(
-                $currentUnidade->latitude,
-                $currentUnidade->longitude,
+                $latitude,
+                $longitude,
                 $unidade->latitude,
                 $unidade->longitude
             );
@@ -89,7 +83,7 @@ class VendasController extends Controller
             }
         }
 
-        return $closestUnidade->unidade;
+        return $closestUnidade;
     }
 
 
@@ -109,6 +103,12 @@ class VendasController extends Controller
             cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
 
         return $angle * $earthRadius;
+    }
+
+    public function isRoaming($latitude, $longitude, $unidadeLatitude, $unidadeLongitude, $threshold = 0.5)
+    {
+        $distance = $this->getDistanceBetweenPoints($latitude, $longitude, $unidadeLatitude, $unidadeLongitude);
+        return $distance > $threshold;
     }
 
     public function getSalesFiltered($diretoria_id, $unidade_id, $vendedor_id, $date)
@@ -154,20 +154,29 @@ class VendasController extends Controller
                     DB::raw('users.unidade_id as unidade_id'),
                     DB::raw('users.diretoria_id as diretoria_id'),
                     DB::raw('users.gerente_id as gerente_id'),
+                    DB::raw('unidade.unidade as unidade'),
                     DB::raw('users.name as username'),
                     DB::raw('diretoria.diretoria as diretoria'),
-                    DB::raw('unidade.unidade as unidade'),
-                    DB::raw('unidade.latitude as latitude'),
-                    DB::raw('unidade.longitude as longitude')
+                    DB::raw('unidade.latitude as unidade_latitude'),
+                    DB::raw('unidade.longitude as unidade_longitude'),
                 )
                 ->get();
 
             $saleInfo = $saleInfo[0];
 
             $saleInfo->valor = $venda->valor;
-            $saleInfo->is_roaming = $venda->is_roaming;
-            $saleInfo->closest_unidade = $this->searchNearbyUnidades($saleInfo->unidade_id);
+            $saleInfo->latitude = $venda->latitude;
+            $saleInfo->longitude = $venda->longitude;
+            $closestUnidade = $this->searchNearbyUnidades($venda->latitude, $venda->longitude, $saleInfo->unidade_id);
+            $saleInfo->closest_unidade = $closestUnidade ? $closestUnidade->unidade : null;
             $saleInfo->created_at = Carbon::parse($venda->created_at)->format('d/m/Y H:i:s');
+
+            $saleInfo->is_roaming = $this->isRoaming(
+                $venda->latitude, 
+                $venda->longitude, 
+                $saleInfo->unidade_latitude, 
+                $saleInfo->unidade_longitude
+            );
 
             $response[] = $saleInfo;
 
@@ -179,11 +188,10 @@ class VendasController extends Controller
 
     public function getSales()
     {
-
         $vendas = Venda::all();
-
+    
         $response = [];
-
+    
         foreach ($vendas as $venda) {
             $saleInfo = DB::table('users')
                 ->join('diretoria', 'users.diretoria_id', '=', 'diretoria.id')
@@ -194,27 +202,37 @@ class VendasController extends Controller
                     DB::raw('users.unidade_id as unidade_id'),
                     DB::raw('users.diretoria_id as diretoria_id'),
                     DB::raw('users.gerente_id as gerente_id'),
+                    DB::raw('unidade.unidade as unidade'),
                     DB::raw('users.name as username'),
                     DB::raw('diretoria.diretoria as diretoria'),
-                    DB::raw('unidade.unidade as unidade'),
-                    DB::raw('unidade.latitude as latitude'),
-                    DB::raw('unidade.longitude as longitude')
+                    DB::raw('unidade.latitude as unidade_latitude'),
+                    DB::raw('unidade.longitude as unidade_longitude'),
                 )
                 ->get();
-
+    
             $saleInfo = $saleInfo[0];
-
+    
             $saleInfo->valor = $venda->valor;
-            $saleInfo->is_roaming = $venda->is_roaming;
-            $saleInfo->closest_unidade = $this->searchNearbyUnidades($saleInfo->unidade_id);
+            $saleInfo->latitude = $venda->latitude;
+            $saleInfo->longitude = $venda->longitude;
+            $closestUnidade = $this->searchNearbyUnidades($venda->latitude, $venda->longitude, $saleInfo->unidade_id);
+            $saleInfo->closest_unidade = $closestUnidade ? $closestUnidade->unidade : null;
+    
+            $saleInfo->is_roaming = $this->isRoaming(
+                $venda->latitude, 
+                $venda->longitude, 
+                $saleInfo->unidade_latitude, 
+                $saleInfo->unidade_longitude
+            );
+            
             $saleInfo->created_at = Carbon::parse($venda->created_at)->format('d/m/Y H:i:s');
-
+    
             $response[] = $saleInfo;
-
         }
-
+    
         return response()->json($response);
-
     }
+    
+
 
 }
